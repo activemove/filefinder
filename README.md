@@ -1,23 +1,27 @@
 # FileFinder
 
-FileFinder e un'app Windows portabile per esplorare, analizzare e riorganizzare file e cartelle con interfaccia HTML.
+FileFinder è un'applicazione Windows portabile per esplorare, analizzare, pulire e riorganizzare file e cartelle con interfaccia HTML ed intelligenza artificiale locale offline (Qwen2.5).
+
+- **Sito Ufficiale Prodotto**: [https://www.dandreaconsulenze.com/filefinder/](https://www.dandreaconsulenze.com/filefinder/)
+- **Sviluppato da**: D'Andrea Consulenze (DAMC) — [https://www.dandreaconsulenze.com](https://www.dandreaconsulenze.com) | [https://www.damc.it](https://www.damc.it)
 
 ## Stato attuale
 
-- build portabile corrente: `dist\FileFinder 1.0.0.exe`
-- launcher rapido: `FileFinder.exe`
-- core applicazione: `FileFinder-core.exe`
-- AI locale integrata: Qwen2.5 offline
+- **Versione corrente**: 1.0.9 Portabile Windows x64
+- **Launcher rapido**: `FileFinder.exe`
+- **Core applicazione**: `FileFinder-core.exe`
+- **AI locale integrata**: Qwen2.5 offline via `llama-server`
 
 ## Funzioni principali
 
 - Esplora stile filesystem con click, doppio click, menu contestuale e ordinamenti
 - Ambito persistente tra `Panoramica`, `Struttura`, `Duplicati`, `Pulizia` e `Protocollazione`
-- Analisi reale di dimensioni, file grandi, duplicati, temporanei e cartelle app/progetto
+- Analisi reale di dimensioni, file grandi, duplicati SHA-256, temporanei e cartelle app/progetto
 - Contenitori drag and drop per spostare file e cartelle senza ricaricare la vista
-- Anteprima locale per immagini, PDF, testo, DOCX e XLSX quando il file e disponibile offline
+- Anteprima locale per immagini, PDF, testo, DOCX e XLSX quando il file è disponibile offline
 - Protocollazione e rinomina massiva basata su formula e metadati
-- Protocollo attivita esportabile in JSON
+- AI locale offline (Qwen2.5 1.5B) per assistenza contestuale, ricerca avanzata e suggerimenti
+- Protocollo attività esportabile in JSON
 
 ## Avvio
 
@@ -30,8 +34,9 @@ FileFinder e un'app Windows portabile per esplorare, analizzare e riorganizzare 
 
 - I file protetti di sistema non vengono proposti per rinomina o pulizia.
 - Le eliminazioni passano dal Cestino di Windows.
-- I file cloud solo online possono non avere anteprima o dimensione completa finche non diventano disponibili offline.
+- I file cloud solo online possono non avere anteprima o dimensione completa finché non diventano disponibili offline.
 
-## Sviluppo
+## Sviluppo & Licenza
 
-Usa Electron 31 e `electron-builder` per generare la build portabile Windows.
+Usa Electron 31 e C# Native Launcher. Distribuito sotto licenza **MIT Open Source**.
+
