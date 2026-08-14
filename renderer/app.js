@@ -255,19 +255,47 @@ async function refreshAiStatus(attempt = 0) {
   const status = await window.filefinder.aiStatus();
   aiUi.searchButton.disabled = !status.available;
   aiUi.namingButton.disabled = !status.available;
-  const message = status.available ? 'AI locale attiva · Qwen2.5 offline' : 'AI locale in avvio...';
+  const message = status.available ? 'AI locale attiva · Qwen2.5 offline' : status.downloaded ? 'AI locale in avvio...' : 'AI locale non scaricata';
   aiUi.searchLabel.textContent = message;
   aiUi.namingLabel.textContent = message;
   aiUi.searchLabel.classList.toggle('active', status.available);
   aiUi.namingLabel.classList.toggle('active', status.available);
-  const healthMessage = status.available ? 'AI locale funzionante - Qwen2.5 offline' : attempt < 30 ? 'AI locale in caricamento...' : 'AI locale non disponibile';
+  
   document.querySelectorAll('.ai-health').forEach((badge) => {
     badge.classList.toggle('ready', status.available);
-    badge.classList.toggle('loading', !status.available && attempt < 30);
-    badge.classList.toggle('error', !status.available && attempt >= 30);
-    badge.querySelector('strong').textContent = healthMessage;
+    badge.classList.toggle('loading', !status.available && status.downloaded && attempt < 30);
+    badge.classList.toggle('error', !status.available && !status.downloaded);
+    const strong = badge.querySelector('strong');
+    if (status.available) {
+      strong.textContent = 'AI locale funzionante - Qwen2.5 offline';
+    } else if (status.downloaded && attempt < 30) {
+      strong.textContent = 'AI locale in caricamento...';
+    } else if (!status.downloaded) {
+      strong.innerHTML = 'AI locale non scaricata <button id="btnDownloadAiInApp" class="mini-button" style="margin-left: 8px; font-size: 0.75rem;">Scarica AI (1.1GB)</button>';
+      const btn = strong.querySelector('#btnDownloadAiInApp');
+      if (btn) {
+        btn.addEventListener('click', async () => {
+          btn.disabled = true;
+          btn.textContent = 'Scaricamento 0%...';
+          window.filefinder.onAiDownloadProgress((prog) => {
+            btn.textContent = `Scaricamento ${prog.percent}%...`;
+          });
+          try {
+            await window.filefinder.downloadAI();
+            strong.textContent = 'Download completato! Avvio AI...';
+            setTimeout(() => refreshAiStatus(0), 3000);
+          } catch (err) {
+            btn.disabled = false;
+            btn.textContent = 'Riprova Download AI';
+            alert('Errore durante il download dell AI: ' + err.message);
+          }
+        });
+      }
+    } else {
+      strong.textContent = 'AI locale non disponibile';
+    }
   });
-  if (!status.available && attempt < 30) setTimeout(() => refreshAiStatus(attempt + 1), 1000);
+  if (!status.available && status.downloaded && attempt < 30) setTimeout(() => refreshAiStatus(attempt + 1), 1000);
 }
 
 function createAiControls() {

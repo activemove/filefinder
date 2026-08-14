@@ -31,6 +31,12 @@ contextBridge.exposeInMainWorld('filefinder', {
   ,loadIndex: () => ipcRenderer.invoke('load-index')
   ,searchFileContent: (query, files) => ipcRenderer.invoke('search-file-content', { query, files })
   ,aiStatus: () => ipcRenderer.invoke('ai-status')
+  ,downloadAI: () => ipcRenderer.invoke('download-ai')
+  ,onAiDownloadProgress: (callback) => {
+    const listener = (_event, progress) => callback(progress);
+    ipcRenderer.on('ai-download-progress', listener);
+    return () => ipcRenderer.removeListener('ai-download-progress', listener);
+  }
   ,appInfo: () => ipcRenderer.invoke('app-info')
   ,aiAssist: (payload) => ipcRenderer.invoke('ai-assist', payload)
   ,sendTelemetry: (payload) => ipcRenderer.invoke('telemetry-event', payload)

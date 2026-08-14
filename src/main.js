@@ -505,8 +505,49 @@ ipcMain.handle('ai-status', async () => {
     const response = await fetch('http://127.0.0.1:11435/health', { signal: AbortSignal.timeout(2000) });
     const isReady = response.ok;
     const isLoading = response.status === 503;
-    return { available: isReady || isLoading, loading: isLoading, model: 'Qwen2.5 1.5B locale' };
-  } catch (_error) { return { available: false, loading: false, model: null }; }
+    return { available: isReady || isLoading, loading: isLoading, downloaded: true, model: 'Qwen2.5 1.5B locale' };
+  } catch (_error) {
+    const aiDir = path.join(process.env.FILEFINDER_HOME || path.dirname(process.execPath), 'ai');
+    const modelPath = path.join(aiDir, 'qwen2.5-1.5b-instruct-q4_k_m.gguf');
+    const downloaded = fs.existsSync(modelPath);
+    return { available: false, loading: false, downloaded, model: 'Qwen2.5 1.5B locale' };
+  }
+});
+
+ipcMain.handle('download-ai', async (ipcEvent) => {
+  const aiDir = path.join(process.env.FILEFINDER_HOME || path.dirname(process.execPath), 'ai');
+  const modelPath = path.join(aiDir, 'qwen2.5-1.5b-instruct-q4_k_m.gguf');
+  const serverPath = path.join(aiDir, 'llama-server.exe');
+  await fs.promises.mkdir(aiDir, { recursive: true });
+
+  const modelUrl = 'https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf';
+  
+  if (fs.existsSync(modelPath)) return { success: true, message: 'Modello già presente.' };
+
+  const response = await fetch(modelUrl);
+  if (!response.ok) throw new Error('Download modello AI non riuscito.');
+
+  const totalBytes = Number(response.headers.get('content-length') || 1117320736);
+  let downloadedBytes = 0;
+  const fileStream = fs.createWriteStream(modelPath);
+
+  const reader = response.body.getReader();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    fileStream.write(value);
+    downloadedBytes += value.length;
+    if (!ipcEvent.sender.isDestroyed()) {
+      ipcEvent.sender.send('ai-download-progress', { downloadedBytes, totalBytes, percent: Math.round((downloadedBytes / totalBytes) * 100) });
+    }
+  }
+  fileStream.end();
+
+  // Avvia llama-server se presente
+  if (fs.existsSync(serverPath)) {
+    spawn(serverPath, ['-m', modelPath, '--host', '127.0.0.1', '--port', '11435', '-c', '4096', '-ngl', '0', '--no-webui'], { cwd: aiDir, detached: true, windowsHide: true }).unref();
+  }
+  return { success: true };
 });
 
 ipcMain.handle('app-info', () => ({

@@ -1,0 +1,40 @@
+[Version]
+Class=IExpress
+SEDVersion=3.0
+[Options]
+PackagePurpose=ExtractOnly
+ShowInstallProgramWindow=0
+HideExtractAnimation=0
+UseLongFileName=1
+InsideCompressed=0
+CAB_FixedSize=0
+CAB_ResvCodeSigning=6144
+RebootMode=I
+InstallPrompt=%InstallPrompt%
+DisplayLicense=%DisplayLicense%
+FinishMessage=%FinishMessage%
+TargetName=%TargetName%
+FriendlyName=%FriendlyName%
+AppLaunched=%AppLaunched%
+PostInstallCmd=%PostInstallCmd%
+AdminQuietInstCmd=%AdminQuietInstCmd%
+UserQuietInstCmd=%UserQuietInstCmd%
+SourceFiles=SourceFiles
+[Strings]
+InstallPrompt=Vuoi estrarre ed installare FileFinder Portabile v1.0.9?
+DisplayLicense=
+FinishMessage=FileFinder estrazione completata! Puoi ora eseguire FileFinder.exe.
+TargetName=D:\wamp642\www\filefinder_admin\FileFinder-v1.0.9-Setup.exe
+FriendlyName=FileFinder Portable Installer
+AppLaunched=
+PostInstallCmd=
+AdminQuietInstCmd=
+UserQuietInstCmd=
+[SourceFiles]
+SourceFiles0=D:\wamp642\www\filefinder\
+[SourceFiles0]
+%FILE0%=
+%FILE1%=
+%FILE2%=
+%FILE3%=
+%FILE4%=
