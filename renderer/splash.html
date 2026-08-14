@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FileFinder</title>
+    <style>
+      :root { color-scheme: light dark; }
+      * { box-sizing: border-box; }
+      html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: transparent; }
+      body {
+        display: grid;
+        place-items: stretch;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: transparent;
+        animation: appear 240ms ease-out both;
+      }
+      .splash { display: grid; position: relative; place-items: center; align-content: center; gap: 9px; border: 1px solid rgba(80,110,120,.35); border-radius: 8px; background: rgba(238,245,247,.97); box-shadow: 0 22px 60px rgba(0,0,0,.28); }
+      .close { position: absolute; top: 8px; right: 8px; display: grid; width: 30px; height: 30px; place-items: center; border: 0; border-radius: 4px; color: #36515b; background: transparent; font-size: 20px; cursor: pointer; }
+      .close:hover { color: #fff; background: #c94b55; }
+      .logo-wrap { position: relative; width: 126px; height: 126px; }
+      .logo {
+        width: 100%; height: 100%; object-fit: contain;
+        filter: drop-shadow(0 20px 35px rgba(2, 67, 85, 0.22));
+        animation: float 1.7s ease-in-out infinite;
+      }
+      .pulse {
+        position: absolute; inset: 18px; border: 2px solid rgba(24, 157, 190, 0.35);
+        border-radius: 50%; animation: pulse 1.6s ease-out infinite; z-index: -1;
+      }
+      h1 { margin: 0; color: #10252d; font-size: 23px; font-weight: 650; letter-spacing: 0; }
+      p { width: calc(100% - 48px); margin: 0; overflow: hidden; color: #55717b; font-size: 12px; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+      .dots::after { content: ''; animation: dots 1.2s steps(4, end) infinite; }
+      @keyframes appear { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes float { 0%, 100% { transform: translateY(0) scale(.98); } 50% { transform: translateY(-8px) scale(1); } }
+      @keyframes pulse { from { opacity: .7; transform: scale(.72); } to { opacity: 0; transform: scale(1.35); } }
+      @keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75%, 100% { content: '...'; } }
+      @media (prefers-color-scheme: dark) {
+        .splash { border-color: #34434a; background: rgba(18,24,28,.98); }
+        .close { color: #aab9bf; }
+        h1 { color: #edf7fa; }
+        p { color: #91aab3; }
+        .logo { filter: drop-shadow(0 22px 42px rgba(0, 174, 217, 0.2)); }
+      }
+      body.closing .logo { animation: close-logo 600ms ease-in both; }
+      body.closing .pulse { display: none; }
+      @keyframes close-logo { to { opacity: 0; transform: scale(.82); filter: blur(5px); } }
+    </style>
+  </head>
+  <body>
+    <main class="splash">
+      <button class="close" id="closeSplash" title="Chiudi questa finestra" aria-label="Chiudi splash">&times;</button>
+      <div class="logo-wrap"><div class="pulse"></div><img class="logo" src="assets/filefinder-logo.png" alt="" /></div>
+      <h1>FileFinder</h1>
+      <p id="message">Preparazione del filesystem<span class="dots"></span></p>
+    </main>
+    <script>
+      const closing = new URLSearchParams(location.search).get('mode') === 'closing';
+      document.querySelector('#closeSplash').addEventListener('click', () => window.close());
+      if (closing) {
+        document.body.classList.add('closing');
+        document.querySelector('#message').textContent = 'Chiusura sicura';
+      }
+    </script>
+  </body>
+</html>

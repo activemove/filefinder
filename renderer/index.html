@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FileFinder</title>
+    <link rel="stylesheet" href="styles.css?v=1.0.9" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <img class="brand-logo" src="assets/filefinder-logo.png" alt="" />
+          <div>
+            <h1>FileFinder</h1>
+            <p>Filesystem intelligence</p>
+          </div>
+        </div>
+        <div id="aiStatusBrand" class="ai-health loading"><span></span><strong>AI locale in caricamento</strong></div>
+
+        <button id="pickFolder" class="primary-action"><span class="button-icon">+</span> Apri cartella</button>
+        <div class="selected-path" id="selectedPath">Nessuna cartella selezionata</div>
+
+        <nav class="tabs" aria-label="Viste">
+          <button class="tab active" data-view="explorer"><span>▤</span> Esplora</button>
+          <button class="tab" data-view="dashboard"><span>◫</span> Panoramica</button>
+          <button class="tab" data-view="tree"><span>⌘</span> Struttura</button>
+          <button class="tab" data-view="duplicates"><span>⧉</span> Duplicati</button>
+          <button class="tab" data-view="cleanup"><span>◇</span> Pulizia</button>
+          <button class="tab" data-view="search"><span>⌕</span> Ricerca</button>
+          <button class="tab" data-view="naming"><span>Aa</span> Protocollazione</button>
+          <button class="tab" data-view="protocol"><span>≡</span> Attivita</button>
+          <button class="tab" data-view="credits"><span>i</span> Crediti</button>
+        </nav>
+
+        <details class="analysis-settings">
+          <summary>Opzioni analisi</summary>
+          <label class="field"><span>Limite file</span><input id="maxFiles" type="number" min="1000" step="1000" value="80000" /></label>
+          <label class="field"><span>Duplicati fino a MB</span><input id="hashLimit" type="number" min="10" step="100" value="2048" /></label>
+          <button id="scanFolder" class="secondary-action" disabled>Rianalizza</button>
+          <button id="exportProtocol" class="ghost-action" disabled>Salva protocollo</button>
+          <button id="openApps" class="ghost-action">App installate</button>
+          <div id="aiStatusOptions" class="ai-health loading"><span></span><strong>Verifica AI locale...</strong></div>
+        </details>
+        <button id="appCredits" class="app-credits" title="Visita damc.it">FileFinder &middot; www.damc.it</button>
+        <div id="aiStatusFooter" class="ai-health compact loading"><span></span><strong>AI in avvio</strong></div>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Workspace locale</p>
+            <h2 id="viewTitle">Esplora</h2>
+          </div>
+          <div class="workspace-scope"><span>Ambito analisi</span><div id="workspaceRoots" class="workspace-roots"><em>Nessuna cartella nel workspace</em></div><button id="addWorkspace" class="mini-button">+ Cartelle</button></div>
+          <div class="status-pill" id="status">Pronto</div>
+        </header>
+
+        <section id="emptyState" class="empty-state">
+          <img class="empty-logo" src="assets/filefinder-logo.png" alt="" />
+          <h2>Apri una cartella</h2>
+          <p>Il contenuto appare subito. L'analisi dettagliata continua in sottofondo.</p>
+        </section>
+
+        <section id="explorer" class="view hidden">
+          <div class="explorer-toolbar">
+            <button id="goComputer" class="icon-button" title="Questo PC">&#128421;</button>
+            <button id="goBack" class="icon-button" title="Indietro" disabled>&larr;</button>
+            <button id="goUp" class="icon-button" title="Cartella superiore" disabled>&uarr;</button>
+            <div id="breadcrumbs" class="breadcrumbs"></div>
+            <button id="refreshFolder" class="icon-button" title="Aggiorna">&#8635;</button>
+            <select id="sortBy" class="sort-select" title="Ordina elementi"><option value="name">Nome</option><option value="size">Dimensione</option><option value="type">Tipo</option><option value="date">Data</option></select>
+            <button id="sortDirection" class="icon-button" title="Inverti ordinamento">&#8593;</button>
+          </div>
+          <section class="container-dock"><div class="dock-head"><strong>Contenitori</strong><button id="addContainer" class="mini-button">+ Aggiungi cartella</button></div><div id="containerList" class="container-list"></div></section>
+          <div class="explorer-layout">
+          <div class="explorer-main">
+          <aside id="selectionBanner" class="selection-banner hidden">
+            <div id="selectionIcon" class="selection-icon"></div>
+            <div class="selection-copy"><strong id="selectionName"></strong><span id="selectionPath"></span></div>
+            <div class="selection-stat"><span>Tipo</span><strong id="selectionType"></strong></div>
+            <div class="selection-stat"><span>Dimensione</span><strong id="selectionSize"></strong></div>
+            <div class="selection-stat"><span>Modificato</span><strong id="selectionModified"></strong></div>
+          </aside>
+          <div id="analysisProgress" class="analysis-progress hidden">
+            <div class="progress-copy"><strong id="progressPhase">Analisi in corso</strong><span id="progressDetail">Preparazione...</span></div>
+            <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+            <div id="progressCounts" class="progress-counts">0 file, 0 cartelle</div>
+          </div>
+          <div class="explorer-head"><label class="select-all"><input id="selectAllItems" type="checkbox" /> <span>Nome</span></label><span>Ultima modifica</span><span>Tipo</span><span>Dimensione</span></div>
+          <div id="fileBrowser" class="file-browser"></div>
+          </div>
+          <aside id="inspector" class="inspector">
+            <div class="inspector-empty" id="inspectorEmpty">
+              <img src="assets/filefinder-logo.png" alt="" />
+              <strong>Seleziona un elemento</strong>
+              <span>Qui trovi dettagli, dimensioni e azioni.</span>
+            </div>
+            <div id="inspectorContent" class="inspector-content hidden">
+              <div id="inspectorIcon" class="inspector-icon"></div>
+              <h3 id="inspectorName"></h3>
+              <p id="inspectorPath"></p>
+              <div class="size-visual"><div id="inspectorSizeBar"></div></div>
+              <strong id="inspectorSize" class="inspector-size"></strong>
+              <div class="inspector-charts"><div id="inspectorDonut" class="inspector-donut"><span id="inspectorPercent">0%</span></div><div class="chart-copy"><strong>Peso nella cartella</strong><span id="inspectorCompare"></span></div></div>
+              <dl id="inspectorFacts" class="inspector-facts"></dl>
+              <div id="inspectorFlags" class="inspector-flags"></div>
+              <section id="inspectorThumbnails" class="inspector-thumbnails hidden"><div><strong id="previewTitle">Anteprima selezione</strong><span><button id="thumbnailPrev" title="Documento precedente">&larr;</button><b id="thumbnailPage">1/1</b><button id="thumbnailNext" title="Documento successivo">&rarr;</button></span></div></section>
+              <div id="inspectorPreview" class="inspector-preview hidden"><img id="inspectorPreviewImage" alt="Anteprima immagine"/><embed id="inspectorPreviewDocument" class="hidden" type="application/pdf"/><pre id="inspectorPreviewText" class="hidden"></pre><span id="inspectorPreviewMessage"></span></div>
+              <div class="inspector-actions">
+                <button id="inspectOpen" class="primary-action">Apri con Windows</button>
+                <button id="inspectReveal" class="ghost-action">Mostra posizione</button>
+                <button id="inspectTrash" class="danger-action hidden">Sposta nel Cestino</button>
+              </div>
+            </div>
+          </aside>
+          </div>
+        </section>
+
+        <section id="dashboard" class="view active hidden">
+          <div class="metrics-grid">
+            <article class="metric"><span>File</span><strong id="metricFiles">0</strong></article>
+            <article class="metric"><span>Cartelle</span><strong id="metricFolders">0</strong></article>
+            <article class="metric"><span>Dimensione</span><strong id="metricSize">0 B</strong></article>
+            <article class="metric recovery"><span>Spazio recuperabile</span><strong id="metricRecoverable">0 B</strong><button id="goCleanup" class="mini-button">Libera spazio</button></article>
+          </div>
+
+          <div class="split">
+            <section class="panel">
+              <h3>Dimensioni per tipo</h3>
+              <div id="extensionChart" class="type-chart"></div>
+            </section>
+            <section class="panel">
+              <h3>Suggerimenti</h3>
+              <div id="suggestions" class="suggestions"></div>
+            </section>
+          </div>
+
+          <section class="panel">
+            <h3>File piu grandi</h3>
+            <div id="largestFiles" class="table-list"></div>
+          </section>
+        </section>
+
+        <section id="tree" class="view hidden">
+          <div class="structure-summary" id="structureSummary"></div>
+          <div class="structure-layout">
+            <section class="panel structure-current">
+              <div class="panel-head"><div><h3>Struttura attuale</h3><p class="panel-subtitle" id="structureRoot"></p></div></div>
+              <div id="folderTree" class="folder-tree"></div>
+            </section>
+            <section class="panel structure-proposal">
+              <div class="panel-head"><div><h3>Struttura consigliata</h3><p class="panel-subtitle">Piano professionale costruito dai file realmente analizzati.</p></div></div>
+              <div id="structurePlan" class="structure-plan"></div>
+            </section>
+          </div>
+          <section class="panel"><div class="panel-head"><div><h3>Controllo qualita archivio</h3><p class="panel-subtitle">Anomalie che rallentano ricerca, conservazione e passaggio di consegne.</p></div></div><div id="structureAudit" class="structure-audit"></div></section>
+        </section>
+
+        <section id="duplicates" class="view hidden">
+          <section class="panel">
+            <div class="panel-head"><h3>File identici in posizioni diverse</h3><button id="trashDuplicates" class="danger-action" disabled>Sposta copie selezionate nel Cestino</button></div>
+            <div id="duplicateList" class="stack-list"></div>
+          </section>
+        </section>
+
+        <section id="cleanup" class="view hidden">
+          <section class="cleanup-source"><div><span>Cartella analizzata</span><strong id="cleanupRoot">Nessuna cartella analizzata</strong><small id="cleanupIndexedAt">Apri una cartella in Esplora e avvia l'analisi.</small></div><button id="analyzeCurrent" class="primary-action">Analizza cartella aperta</button></section>
+          <section class="cleanup-summary"><div><span>Basso rischio</span><strong id="tempWaste">0 B</strong></div><div><span>Duplicati da verificare</span><strong id="duplicateWaste">0 B</strong></div><div><span>Spazio potenziale</span><strong id="totalWaste">0 B</strong></div></section>
+          <div class="split">
+            <section class="panel">
+              <div class="panel-head">
+                <h3>Temporanei candidati</h3>
+                <button id="trashSelected" class="danger-action" disabled>Sposta selezionati nel Cestino</button>
+              </div>
+              <div id="tempFiles" class="table-list"></div>
+            </section>
+            <section class="panel">
+              <h3>Cartelle app o progetti</h3>
+              <div id="appFolders" class="stack-list"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="search" class="view hidden">
+          <section class="panel">
+            <div class="advanced-search">
+              <input id="searchInput" class="search-query" type="search" placeholder="Nome, percorso o parole nel contenuto..." />
+              <select id="searchType">
+                <option value="all">Tutti</option>
+                <option value="large">Solo grandi</option>
+                <option value="temp">Temporanei</option>
+                <option value="duplicate">Duplicati</option>
+                <option value="cloud">Cloud</option>
+              </select>
+              <select id="searchCategory"><option value="all">Ogni tipo</option><option value="document">Documenti</option><option value="image">Immagini</option><option value="video">Video</option><option value="audio">Audio</option><option value="archive">Archivi</option><option value="other">Altri</option></select>
+              <input id="searchMinSize" type="number" min="0" placeholder="Min MB" title="Dimensione minima in MB" />
+              <input id="searchMaxSize" type="number" min="0" placeholder="Max MB" title="Dimensione massima in MB" />
+              <input id="searchFrom" type="date" title="Modificato dal" />
+              <input id="searchTo" type="date" title="Modificato fino al" />
+              <select id="searchSort"><option value="relevance">Rilevanza</option><option value="size-desc">Piu grandi</option><option value="date-desc">Piu recenti</option><option value="date-asc">Piu vecchi</option></select>
+              <label class="content-toggle"><input id="searchContent" type="checkbox" /> Cerca nel contenuto</label>
+            </div>
+            <div id="searchStatus" class="search-status">Imposta uno o piu filtri.</div>
+            <div id="searchResults" class="table-list"></div>
+          </section>
+        </section>
+
+        <section id="protocol" class="view hidden">
+          <section class="panel">
+            <div class="panel-head"><div><h3>Attivita</h3><p class="panel-subtitle">Scansioni e spazio liberato. I dettagli tecnici restano nel file esportato.</p></div><button id="clearActivity" class="ghost-action">Nascondi</button></div>
+            <div id="protocolList" class="protocol-list"></div>
+          </section>
+        </section>
+        <section id="naming" class="view hidden"><section class="panel naming-tool"><div class="panel-head"><div><h3>Protocollazione e rinomina</h3><p class="panel-subtitle">Costruisci nomi coerenti usando cartella, numero, date, tipo e metadati disponibili.</p></div><button id="applyNaming" class="primary-action" disabled>Applica rinomina</button></div><div class="naming-source"><div><strong id="namingSourceLabel">Nessuna sorgente scelta</strong><small id="namingSourceCount">Scegli una cartella o un gruppo di file.</small></div><button id="chooseNamingFolder" class="ghost-action">Scegli cartella</button><button id="chooseNamingFiles" class="ghost-action">Scegli file</button></div><div class="formula-grid"><label>Formula<input id="namingFormula" value="[{documento}] {cliente} - NR {numero_documento} {data}.{estensione}" /></label><label>Data<select id="namingDate"><option value="modified">Ultima modifica</option><option value="created">Creazione</option><option value="today">Oggi</option></select></label><label>Cifre numero<input id="namingDigits" type="number" min="1" max="8" value="2" /></label><label>Inizia da<input id="namingStart" type="number" min="0" value="1" /></label></div><div class="token-list"><button data-token="{documento}">{documento}</button><button data-token="{cliente}">{cliente}</button><button data-token="{numero_documento}">{numero documento}</button><button data-token="{cartella}">{cartella}</button><button data-token="{nome}">{nome}</button><button data-token="{numero}">{numero}</button><button data-token="{data}">{data}</button><button data-token="{tipo}">{tipo}</button><button data-token="{estensione}">{estensione}</button></div><div class="naming-help">L'anteprima mostra esattamente quali file saranno rinominati. Le cartelle protette sono sempre escluse.</div><div id="namingPreview" class="naming-preview"></div></section></section>
+        <section id="credits" class="view hidden"><section class="credits-page"><img src="assets/filefinder-logo.png" alt=""/><h2>FileFinder</h2><p>Analisi locale e organizzazione intelligente del filesystem.</p><div id="aiStatusCredits" class="ai-health large loading"><span></span><strong>Controllo AI locale...</strong></div><dl><div><dt>Versione</dt><dd id="creditsVersion">Caricamento...</dd></div><div><dt>Licenza</dt><dd><button id="licenseLink">MIT License</button> · software fornito senza garanzia</dd></div><div><dt>Sito e download</dt><dd><button id="downloadLink">www.damc.it/filefinder</button></dd></div><div><dt>Privacy</dt><dd>I dati del filesystem restano sul computer.</dd></div><div><dt>Intelligenza</dt><dd>Qwen2.5 funziona offline sul computer.</dd></div><div><dt>Sicurezza</dt><dd>Le eliminazioni passano dal Cestino.</dd></div><div><dt>Responsabilita</dt><dd id="creditsResponsibility">Non ancora accettata</dd></div><div><dt>Statistiche anonime</dt><dd id="creditsTelemetry">Non consentite</dd></div><div><dt>Crediti</dt><dd><button id="creditsLink">www.damc.it</button></dd></div></dl></section></section>
+      </section>
+    </main>
+    <div id="contextMenu" class="context-menu hidden" role="menu">
+      <button data-command="open">Apri / Anteprima</button>
+      <button data-command="rename">Rinomina</button>
+      <button data-command="copy">Copia</button>
+      <button data-command="cut">Taglia</button>
+      <button data-command="paste">Incolla qui</button>
+      <button data-command="print">Stampa</button>
+      <button data-command="delete" class="context-danger">Sposta nel Cestino</button>
+      <button data-command="reveal">Mostra in Esplora file</button>
+      <button data-command="copy-path">Copia percorso</button>
+    </div>
+    <div id="operationOverlay" class="operation-overlay hidden" role="dialog" aria-modal="true">
+      <section class="operation-window">
+        <div class="operation-head"><div><span>Spostamento file</span><strong id="operationTitle">Operazione in corso</strong></div><span id="operationSpinner" class="operation-spinner"></span></div>
+        <dl><div><dt>Origine</dt><dd id="operationSource">-</dd></div><div><dt>Destinazione</dt><dd id="operationDestination">-</dd></div></dl>
+        <div class="progress-track"><div id="operationBar" class="progress-bar working"></div></div>
+        <p id="operationStatus">Preparazione...</p>
+        <button id="operationClose" class="primary-action hidden">Chiudi</button>
+      </section>
+    </div>
+    <div id="firstRunNotice" class="operation-overlay hidden" role="dialog" aria-modal="true">
+      <section class="operation-window legal-notice">
+        <div class="operation-head"><div><span>Primo avvio</span><strong>Uso responsabile di FileFinder</strong></div></div>
+        <p>FileFinder analizza e organizza file locali. Le indicazioni, incluse quelle AI, sono suggerimenti e non garantiscono che un file sia inutile. Verifica sempre percorso, contenuto e backup prima di rinominare, spostare o eliminare. Le eliminazioni vengono inviate al Cestino quando Windows lo consente.</p>
+        <label><input id="acceptResponsibility" type="checkbox" /> Ho letto e accetto di essere responsabile delle operazioni eseguite sui miei file.</label>
+        <label><input id="acceptTelemetry" type="checkbox" /> Consento statistiche anonime di utilizzo (avvii, versione e lingua). Nessun dato del filesystem.</label>
+        <button id="acceptNotice" class="primary-action" disabled>Accetta e continua</button>
+        <small>Software distribuito con licenza MIT, senza garanzia. Crediti: www.damc.it</small>
+      </section>
+    </div>
+
+    <script src="app.js?v=1.0.9"></script>
+  </body>
+</html>

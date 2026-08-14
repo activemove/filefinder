@@ -1,0 +1,46 @@
+{
+  "name": "filefinder",
+  "version": "1.0.9",
+  "description": "Portable Windows file system explorer and cleanup assistant with an HTML frontend.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "mammoth": "^1.12.1"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "compression": "normal",
+    "appId": "local.filefinder",
+    "productName": "FileFinder",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "renderer/**/*",
+      "LICENSE",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/filefinder.ico",
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
+  }
+}
