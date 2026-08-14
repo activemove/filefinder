@@ -512,8 +512,8 @@ ipcMain.handle('ai-status', async () => {
 ipcMain.handle('app-info', () => ({
   version: app.getVersion(),
   license: 'MIT',
-  website: 'https://www.damc.it',
-  downloadUrl: 'https://www.damc.it/filefinder'
+  website: 'https://www.dandreaconsulenze.com',
+  downloadUrl: 'https://www.dandreaconsulenze.com/filefinder/'
 }));
 
 ipcMain.handle('telemetry-event', async (_event, payload) => {
