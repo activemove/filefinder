@@ -502,9 +502,11 @@ ipcMain.handle('search-file-content', async (_event, payload) => {
 
 ipcMain.handle('ai-status', async () => {
   try {
-    const response = await fetch('http://127.0.0.1:11435/health', { signal: AbortSignal.timeout(1500) });
-    return { available: response.ok, model: 'Qwen2.5 1.5B locale' };
-  } catch (_error) { return { available: false, model: null }; }
+    const response = await fetch('http://127.0.0.1:11435/health', { signal: AbortSignal.timeout(2000) });
+    const isReady = response.ok;
+    const isLoading = response.status === 503;
+    return { available: isReady || isLoading, loading: isLoading, model: 'Qwen2.5 1.5B locale' };
+  } catch (_error) { return { available: false, loading: false, model: null }; }
 });
 
 ipcMain.handle('app-info', () => ({
